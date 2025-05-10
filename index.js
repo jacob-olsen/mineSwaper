@@ -28,6 +28,8 @@ function updateUi(data){
     document.getElementById("ram").innerText = "RAM: " + data["Ram"]
 
     updateOffline(data["OfflineServer"])
+    updatePlayerList(data["Players"])
+    updateChat(data["Chat"])
 }
 
 function switchStad(){
@@ -47,9 +49,29 @@ function updateOffline(data){
 
         data.forEach( (element) => {
             taget.innerHTML += '<div class="col-4"><div class="row"><p>'+element+'</p></div><div class="row"><button onclick="loadServer(\''+element+'\')">load</button></div></div>'
-            console.log(element)
         });
     }
+}
+
+function updatePlayerList(data){
+
+        const taget = document.getElementById("playerList")
+        taget.innerHTML = ""
+
+        data.forEach( (element) => {
+            taget.innerHTML += '<div class="col-6"><p>'+element+'</p></div>'
+        });
+}
+
+function updateChat(data){
+
+    const taget = document.getElementById("chat")
+    taget.innerHTML = ""
+
+    data.forEach( (element) => {
+        taget.innerHTML += '<div class="row"><p>'+element+'</p></div>'
+    });
+
 }
 
 function loadServer(name){

@@ -7,38 +7,63 @@
         <title>Index</title>
     </head>
     <body onload="Start()">
-        <div class="container text-center">
+        <div class="text-center">
             <div class="row">
-                <div class="col">
+                <div class="col-3">
                     <div class="row">
-                        <h2 id="name">hej</h2>
+                        <h2>chat</h2>
                     </div>
                     <div class="row">
-                        <div class="col">
-                            <button id="start" onclick="switchStad()">start</button>
-                        </div>
-                        <div class="col">
-                            <button onclick="unloadServer()">unload</button>
+                        <div class="col" id="chat">
+
                         </div>
                     </div>
                 </div>
                 <div class="col">
                     <div class="row">
-                        <p id="online">runing: true</p>
+                        <div class="col">
+                            <div class="row">
+                                <h2 id="name">hej</h2>
+                            </div>
+                            <div class="row">
+                                <div class="col">
+                                    <button id="start" onclick="switchStad()">start</button>
+                                </div>
+                                <div class="col">
+                                    <button onclick="unloadServer()">unload</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="row">
+                                <h3>player's</h3>
+                            </div>
+                            <div class="row" id="playerList">
+        
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="row">
+                                <p id="online">runing: true</p>
+                            </div>
+                            <div class="row">
+                                <p id="ram">RAM: 0M</p>
+                            </div>
+                            <div class="row">
+                                <p id="runtime">rune: 0 Min</p>
+                            </div>
+                        </div>
                     </div>
                     <div class="row">
-                        <p id="ram">RAM: 0M</p>
+                        <hr>
                     </div>
-                    <div class="row">
-                        <p id="runtime">rune: 0 Min</p>
+                    <div class="row" id="serverList">
+                        <p>list</p>
                     </div>
                 </div>
-            </div>
-            <div class="row">
-                <hr>
-            </div>
-            <div class="row" id="serverList">
-                <p>list</p>
+                <div class="col-1">
+
+                </div>
             </div>
         </div>
         <script src="/js"></script>
