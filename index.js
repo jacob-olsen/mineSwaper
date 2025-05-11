@@ -48,7 +48,7 @@ function updateOffline(data){
         taget.innerHTML = ""
 
         data.forEach( (element) => {
-            taget.innerHTML += '<div class="col-4"><div class="row"><p>'+element+'</p></div><div class="row"><button onclick="loadServer(\''+element+'\')">load</button></div></div>'
+            taget.innerHTML += '<div class="col-4 card"><div class="row"><p>'+element+'</p></div><div class="row"><button onclick="loadServer(\''+element+'\')">load</button></div></div>'
         });
     }
 }
@@ -69,7 +69,7 @@ function updateChat(data){
     taget.innerHTML = ""
 
     data.forEach( (element) => {
-        taget.innerHTML += '<div class="row"><p>'+element+'</p></div>'
+        taget.innerHTML += '<div class="row"><div class="col-auto"><p>'+element["Name"]+'</p></div><div class="col-auto"><p>'+element["Text"]+'</p></div></div><div class="row"><hr></div>'
     });
 
 }

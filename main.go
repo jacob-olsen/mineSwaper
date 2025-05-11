@@ -17,13 +17,21 @@ type statusData struct {
 	Runtime       string
 	OfflineServer []string
 	Players       []string
-	Chat          []string
+	Chat          []Mgs
+}
+
+type Mgs struct {
+	Time string
+	Name string
+	Text string
 }
 
 var serversPath = "./stordPacks"
 var ruinigPath = "./run"
 
 var systemDService = "minecraft.service"
+
+var stordData statusData
 
 func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -148,7 +156,7 @@ func listServers() (names []string) {
 	return
 }
 
-func scanLogs() (playerList []string, chatList []string) {
+func scanLogs() (playerList []string, chatList []Mgs) {
 	online, _, _ := getServerInfo()
 	if !online {
 		return
@@ -173,9 +181,14 @@ func scanLogs() (playerList []string, chatList []string) {
 		logText := logs[pos:offset]
 
 		if "<" == logText[:1] {
-			logText = strings.Replace(logText[1:], ">", ":", 1)
+			var newMgs Mgs
+			findSplit := strings.Index(logText, ">")
 
-			chatList = append(chatList, logText)
+			newMgs.Name = logText[1:findSplit]
+			newMgs.Text = logText[findSplit+1:]
+			newMgs.Time = "00:00:00"
+
+			chatList = append(chatList, newMgs)
 		} else if "left the game" == logText[len(logText)-13:] {
 			playerName := logText[:len(logText)-14]
 			if slices.Contains(playerList, playerName) {
