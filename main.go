@@ -32,6 +32,7 @@ var ruinigPath = "./run"
 var systemDService = "minecraft.service"
 
 var stordData statusData
+var offset int
 
 func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -41,15 +42,12 @@ func main() {
 		http.ServeFile(w, r, "index.js")
 	})
 	http.HandleFunc("/status", func(w http.ResponseWriter, r *http.Request) {
+		stordData.Online, stordData.Runtime, stordData.Ram = getServerInfo()
+		stordData.Name = getName()
+		stordData.OfflineServer = listServers()
 		scanLogs()
 
-		var data statusData
-		data.Online, data.Runtime, data.Ram = getServerInfo()
-		data.Name = getName()
-		data.OfflineServer = listServers()
-		data.Players, data.Chat = scanLogs()
-
-		dataJson, _ := json.Marshal(data)
+		dataJson, _ := json.Marshal(stordData)
 		w.Write(dataJson)
 	})
 	http.HandleFunc("/unload", func(w http.ResponseWriter, r *http.Request) {
@@ -156,7 +154,7 @@ func listServers() (names []string) {
 	return
 }
 
-func scanLogs() (playerList []string, chatList []Mgs) {
+func scanLogs() {
 	online, _, _ := getServerInfo()
 	if !online {
 		return
@@ -168,8 +166,12 @@ func scanLogs() (playerList []string, chatList []Mgs) {
 	}
 
 	logs := string(file)
+	if offset > len(logs) {
+		offset = 0
+	} else if offset == len(logs) {
+		return
+	}
 
-	offset := 0
 	for true {
 		pos := strings.Index(logs[offset+1:], "[net.minecraft.server.MinecraftServer/]:")
 		if pos == -1 {
@@ -186,22 +188,33 @@ func scanLogs() (playerList []string, chatList []Mgs) {
 
 			newMgs.Name = logText[1:findSplit]
 			newMgs.Text = logText[findSplit+1:]
-			newMgs.Time = "00:00:00"
 
-			chatList = append(chatList, newMgs)
+			startOffLine := strings.LastIndex(logs[:offset], "\n")
+			timeStart := strings.Index(logs[startOffLine:], " ") + 1 + startOffLine
+			timeEnd := strings.Index(logs[startOffLine:], ".") + startOffLine
+
+			newMgs.Time = logs[timeStart:timeEnd]
+			stordData.Chat = append(stordData.Chat, newMgs)
+
+			if !slices.Contains(stordData.Players, newMgs.Name) {
+				stordData.Players = append(stordData.Players, newMgs.Name)
+			}
+			if len(stordData.Chat) > 30 {
+				stordData.Chat = stordData.Chat[1:]
+			}
 		} else if "left the game" == logText[len(logText)-13:] {
 			playerName := logText[:len(logText)-14]
-			if slices.Contains(playerList, playerName) {
-				playerList = removeFromList(playerList, playerName)
+			if slices.Contains(stordData.Players, playerName) {
+				stordData.Players = removeFromList(stordData.Players, playerName)
 			}
 		} else if "joined the game" == logText[len(logText)-15:] {
 			playerName := logText[:len(logText)-16]
-			if !slices.Contains(playerList, playerName) {
-				playerList = append(playerList, playerName)
+			if !slices.Contains(stordData.Players, playerName) {
+				stordData.Players = append(stordData.Players, playerName)
 			}
 		}
 	}
-
+	offset = len(logs)
 	return
 }
 

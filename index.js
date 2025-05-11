@@ -69,7 +69,7 @@ function updateChat(data){
     taget.innerHTML = ""
 
     data.forEach( (element) => {
-        taget.innerHTML += '<div class="row"><div class="col-auto"><p>'+element["Name"]+'</p></div><div class="col-auto"><p>'+element["Text"]+'</p></div></div><div class="row"><hr></div>'
+        taget.innerHTML += '<div class="row"><p>'+element["Time"]+" "+element["Name"]+'</p></div> <div class="row"><p>'+element["Text"]+'</p></div> <div class="row"><hr></div>'
     });
 
 }
