@@ -3,7 +3,7 @@ var offlineCount
 
 function Start(){
     updateStatus()
-    setInterval(updateStatus,30000)
+    setInterval(updateStatus,10000)
 }
 
 function updateStatus(){
@@ -28,7 +28,12 @@ function updateUi(data){
     document.getElementById("ram").innerText = "RAM: " + data["Ram"]
 
     updateOffline(data["OfflineServer"])
-    updatePlayerList(data["Players"])
+    if (data["ShutdownTime"] == 0){
+        updatePlayerList(data["Players"])
+    }else{
+        updateShutdownTimmer(data["ShutdownTime"])
+    }
+    
     updateChat(data["Chat"])
 }
 
@@ -51,6 +56,12 @@ function updateOffline(data){
             taget.innerHTML += '<div class="col-4 card"><div class="row"><p>'+element+'</p></div><div class="row"><button onclick="loadServer(\''+element+'\')">load</button></div></div>'
         });
     }
+}
+
+function updateShutdownTimmer(data){
+    const taget = document.getElementById("playerList")
+    taget.innerHTML = '<div class="row"><h2>server shutdown in</h2></div><div class="row"><h1>'+data+' sec</h1></div>'
+
 }
 
 function updatePlayerList(data){

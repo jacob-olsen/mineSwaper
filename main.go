@@ -12,10 +12,13 @@ import (
 )
 
 type statusData struct {
-	Name          string
-	Online        bool
-	Ram           string
-	Runtime       string
+	Name    string
+	Online  bool
+	Ram     string
+	Runtime string
+
+	ShutdownTime int
+
 	OfflineServer []string
 	Players       []string
 	Chat          []Mgs
@@ -93,11 +96,14 @@ func scanLoppes() {
 		if len(stordData.Players) == 0 {
 			autoShutdown--
 			fmt.Println("no players shutdown in:", autoShutdown*30, "sec")
+			stordData.ShutdownTime = autoShutdown * 30
 			if autoShutdown <= 0 {
+				stordData.ShutdownTime = 0
 				//stopServer()
 			}
 		} else if autoShutdown != autoShutdownTaget {
 			fmt.Println("player joind reset countdown")
+			stordData.ShutdownTime = 0
 			autoShutdown = autoShutdownTaget
 		}
 	}
