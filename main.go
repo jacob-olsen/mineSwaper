@@ -43,6 +43,9 @@ var autoShutdownTaget = 120 //count runs evry 30 sec so 120 * 30 sec = 60 min
 
 func main() {
 	stordData.Name = getName()
+	stordData.OfflineServer = listServers()
+	scanLogs()
+
 	go scanLoppes()
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
