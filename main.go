@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"slices"
 	"strings"
+	"time"
 )
 
 type statusData struct {
@@ -33,8 +34,14 @@ var systemDService = "minecraft.service"
 
 var stordData statusData
 var offset int
+var autoScan bool
+var autoShutdown int
+var autoShutdownTaget = 120 //count runs evry 30 sec so 120 * 30 sec = 60 min
 
 func main() {
+	stordData.Name = getName()
+	go scanLoppes()
+
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "index.html")
 	})
@@ -43,9 +50,11 @@ func main() {
 	})
 	http.HandleFunc("/status", func(w http.ResponseWriter, r *http.Request) {
 		stordData.Online, stordData.Runtime, stordData.Ram = getServerInfo()
-		stordData.Name = getName()
-		stordData.OfflineServer = listServers()
-		scanLogs()
+
+		if !autoScan {
+			stordData.OfflineServer = listServers()
+			scanLogs()
+		}
 
 		dataJson, _ := json.Marshal(stordData)
 		w.Write(dataJson)
@@ -70,6 +79,30 @@ func main() {
 	http.ListenAndServe("0.0.0.0:8080", nil)
 }
 
+func scanLoppes() {
+	if autoScan == true {
+		return
+	} else {
+		autoScan = true
+		autoShutdown = autoShutdownTaget
+	}
+	for autoScan {
+		time.Sleep(30 * time.Second)
+		stordData.OfflineServer = listServers()
+		scanLogs()
+		if len(stordData.Players) == 0 {
+			autoShutdown--
+			fmt.Println("no players shutdown in:", autoShutdown*30, "sec")
+			if autoShutdown <= 0 {
+				//stopServer()
+			}
+		} else if autoShutdown != autoShutdownTaget {
+			fmt.Println("player joind reset countdown")
+			autoShutdown = autoShutdownTaget
+		}
+	}
+}
+
 func getName() string {
 	nameByte, err := os.ReadFile(ruinigPath + "/name")
 	if err != nil {
@@ -85,6 +118,7 @@ func getName() string {
 func stopServer() {
 	cmd := exec.Command("systemctl", "stop", systemDService)
 	cmd.Run()
+	autoScan = false
 }
 func startServer() {
 	if !exists(ruinigPath) {
@@ -92,6 +126,7 @@ func startServer() {
 	}
 	cmd := exec.Command("systemctl", "start", systemDService)
 	cmd.Run()
+	go scanLoppes()
 }
 
 func getServerInfo() (online bool, runtime string, ram string) {
@@ -132,6 +167,7 @@ func unloadServer() {
 	}
 
 	os.Rename(ruinigPath, serversPath+"/"+getName())
+	stordData.Name = getName()
 }
 
 func loadServer(pack string) {
@@ -142,6 +178,7 @@ func loadServer(pack string) {
 	}
 
 	os.Rename(serversPath+"/"+pack, ruinigPath)
+	stordData.Name = getName()
 }
 
 func listServers() (names []string) {
