@@ -60,7 +60,7 @@ function updateOffline(data){
 
 function updateShutdownTimmer(data){
     const taget = document.getElementById("playerList")
-    taget.innerHTML = '<div class="row"><h2>server shutdown in</h2></div><div class="row"><h1>'+data+' sec</h1></div>'
+    taget.innerHTML = '<div class="row"><h2>server shutdown in</h2></div><div class="row"><h1>'+data+'</h1></div>'
 
 }
 

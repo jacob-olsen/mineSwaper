@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"slices"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -17,7 +18,7 @@ type statusData struct {
 	Ram     string
 	Runtime string
 
-	ShutdownTime int
+	ShutdownTime string
 
 	OfflineServer []string
 	Players       []string
@@ -39,7 +40,7 @@ var stordData statusData
 var offset int
 var autoScan bool
 var autoShutdown int
-var autoShutdownTaget = 120 //count runs evry 30 sec so 120 * 30 sec = 60 min
+var autoShutdownTaget int = 259200
 
 func main() {
 	stordData.Name = getName()
@@ -97,19 +98,46 @@ func scanLoppes() {
 		stordData.OfflineServer = listServers()
 		scanLogs()
 		if len(stordData.Players) == 0 {
-			autoShutdown--
-			fmt.Println("no players shutdown in:", autoShutdown*30, "sec")
-			stordData.ShutdownTime = autoShutdown * 30
+			autoShutdown -= 30
+			stordData.ShutdownTime = secToHumanTime(autoShutdown)
 			if autoShutdown <= 0 {
-				stordData.ShutdownTime = 0
-				//stopServer()
+				stordData.ShutdownTime = "0"
+				stopServer()
 			}
 		} else if autoShutdown != autoShutdownTaget {
 			fmt.Println("player joind reset countdown")
-			stordData.ShutdownTime = 0
+			stordData.ShutdownTime = "0"
 			autoShutdown = autoShutdownTaget
 		}
 	}
+	stordData.ShutdownTime = "0"
+}
+
+func secToHumanTime(sec int) (human string) {
+	var found int
+	found, sec = returnRemaing(sec, 60)
+	human = strconv.Itoa(found)
+	if sec <= 0 {
+		return
+	}
+	found, sec = returnRemaing(sec, 3600)
+	human = strconv.Itoa(found/60) + ":" + human
+	if sec <= 0 {
+		return
+	}
+	found, sec = returnRemaing(sec, 86400)
+	human = strconv.Itoa(found/3600) + ":" + human
+	if sec <= 0 {
+		return
+	}
+	human = strconv.Itoa(sec/86400) + " D-" + human
+	return
+}
+
+func returnRemaing(input int, taget int) (found int, remaing int) {
+	found = input % taget
+	remaing = input - found
+	return
 }
 
 func getName() string {
@@ -128,6 +156,8 @@ func stopServer() {
 	cmd := exec.Command("systemctl", "stop", systemDService)
 	cmd.Run()
 	autoScan = false
+	stordData.Players = []string{}
+	stordData.Chat = []Mgs{}
 }
 func startServer() {
 	if !exists(ruinigPath) {
